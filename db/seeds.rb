@@ -7,14 +7,42 @@
 #   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
-
+require "csv"
 require 'faker'
 
-676.times do
+# clear existing data
+Product.destroy_all
+Category.destroy_all
+
+# read the csv file
+csv_file = Rails.root.join('db/products.csv')
+csv_data = File.read(csv_file)
+
+# If CSV was created by Excel in Windows you may also need to set an encoding type:
+# products = CSV.parse(csv_data, headers: true, encoding: 'iso-8859-1')
+
+# parse the csv data
+products = CSV.parse(csv_data, headers: true)
+
+# handle the csv data
+products.each do |product|
+    # get the category name
+    category_name = product['category_name']
+    category = Category.find_or_create_by(name: category_name)
+
+products.each do |product|
+
+    # Create categories and products here.
     Product.create(
-        title: Faker::Commerce.product_name,
-        description: Faker::Lorem.paragraph,
-        price: Faker::Commerce.price(range: 0..100.0),
-        stock_quantity: Faker::Number.between(from: 1, to: 100)
+        title: product['title'],
+        description: product['description'],
+        price: product['price'],
+        stock_quantity: product['stock_quantity'],
+        category: category
     )
+
 end
+
+category = Category.find_or_create_by(name: category_name)
+
+# Where "category_name" is the category name as a string. You will need to get this from the data returned from the csv library.
